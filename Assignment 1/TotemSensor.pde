@@ -1,8 +1,10 @@
+import processing.serial.*;
+
 final int PORT_NUM = 0;
 
 boolean hasContact = false;
 Serial arduinoPort;
-String hex = "#000000";
+String hex = "000000";
 
 void setup() {
     connectArduino();
@@ -11,7 +13,7 @@ void setup() {
 void draw() {
     if (!hasContact) return;
 
-    background(color(hex));
+    background(unhex(hex));
 }
 
 void serialEvent(Serial port) {

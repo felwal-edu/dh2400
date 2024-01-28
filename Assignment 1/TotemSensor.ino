@@ -28,7 +28,7 @@ void loop() {
   int g = toRgbVal(totemsG);
   int b = toRgbVal(totemsB);
 
-  String hex = "#" + hexify(r) + hexify(g) + hexify(b);
+  String hex = hexify(r) + hexify(g) + hexify(b);
   Serial.println(hex);
 }
 

@@ -2,6 +2,8 @@ const int PIN_IN_TOTEM_R = 0;
 const int PIN_IN_TOTEM_G = 1;
 const int PIN_IN_TOTEM_B = 2;
 
+const int TOTEM_COUNT = 9;
+
 const int VOLT_IN = 5;
 const int RES_FIXED = 1;
 const int RES_TOTEM = 2; // should be 2x FIXED
@@ -27,7 +29,6 @@ void loop() {
   int b = toHexLetter(totemsB);
 
   String hex = "#" + (r + r) + (g + g) + (b + b);
-  //Serial.println(hex);
 
   // send to Processing
   //Serial.println(hex)
@@ -51,26 +52,31 @@ int totemRead(int pin) {
   // 3 -> 341
 
   int inVal = analogRead(pin);
-  int inVals[9] = {};
-  int totemCount = -1;
+  int inVals[TOTEM_COUNT] = {};
 
   //Serial.println("inVal: " + inVal);
 
-  for (int totems = 0; totems <= 4; totems++) {
+  for (int totems = 0; totems <= TOTEM_COUNT; totems++) {
     int resistors = totems + 1; // one in the base
     int resTot = RES_TOTEM / resistors;
     int voltOut = VOLT_IN * (resTot / (resTot + RES_FIXED));
-    int analogIn = 1023 / 5 * voltOut;
-    inVals[totems] = analogIn;
+    int inVal_ = 1023 / VOLT_IN * voltOut;
+    inVals[totems] = inVal_;
 
-    if (inVal > analogIn) {
-      // TODO: half the diff
-      totemCount = totems;
-      break;
+    // since no previous inval, just check if larger
+    if (totems == 0 && inVal > inVal_) {
+      return totems;
+    }
+
+    int diffToPrev = inVals[totems - 1] - inVal_;
+
+    // use +- half the diff as boundary
+    if (inVal > inVal_ + diffToPrev / 2) {
+      return totems - 1;
     }
   }
 
-  return totemCount;
+  return -1;
 }
 
 String toHexLetter(int totemCount) {
@@ -81,6 +87,6 @@ String toHexLetter(int totemCount) {
     case 1: return "5";
     case 2: return "A";
     case 3: return "F";
-    default: return "F";
+    default: return "F"; // TODO: some odd color
   }
 }

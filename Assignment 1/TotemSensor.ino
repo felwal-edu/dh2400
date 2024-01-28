@@ -12,6 +12,8 @@ void setup() {
   pinMode(PIN_IN_TOTEM_R, INPUT);
   pinMode(PIN_IN_TOTEM_G, INPUT);
   pinMode(PIN_IN_TOTEM_B, INPUT);
+
+  connectProcessing();
 }
 
 void loop() {
@@ -24,11 +26,20 @@ void loop() {
   int g = toHexLetter(totemsG);
   int b = toHexLetter(totemsB);
 
-  String hex = (r + r) + (g + g) + (b + b);
+  String hex = "#" + (r + r) + (g + g) + (b + b);
   //Serial.println(hex);
 
   // send to Processing
-  // TODO
+  //Serial.println(hex)
+}
+
+void connectProcessing() {
+  // https://learn.sparkfun.com/tutorials/connecting-arduino-to-processing/all
+
+  while (Serial.available() <= 0) {
+    Serial.println(".");
+    delay(300);
+  }
 }
 
 int totemRead(int pin) {

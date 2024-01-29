@@ -44,10 +44,7 @@ void connectProcessing() {
 int totemRead(int pin) {
   // returns number of totems
 
-  // 0 -> 682
-  // 1 -> 511.5
-  // 2 -> 409.2
-  // 3 -> 341
+  // 0 -> 682 | 1 -> 511.5 | 2 -> 409.2 | 3 -> 341
 
   int inVal = analogRead(pin);
   int inVals[TOTEM_COUNT] = {};

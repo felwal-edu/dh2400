@@ -1,6 +1,7 @@
 import processing.serial.*;
 
 final int PORT_NUM = 0;
+final int DEBUG = false;
 
 boolean hasContact = false;
 Serial arduinoPort;
@@ -12,10 +13,10 @@ void setup() {
 }
 
 void draw() {
-  if (!hasContact) return;
+  if (!hasContact && !DEBUG) return;
 
   int dec = unhex(hex);
-  
+
   // avoid unhex(0000XX) resulting in greyscale when passed to background()
   if (hex.substring(0, 4).equals("0000")) {
     background(0, 0, dec);
@@ -46,6 +47,8 @@ void serialEvent(Serial port) {
 
 void connectArduino() {
   // https://learn.sparkfun.com/tutorials/connecting-arduino-to-processing/all
+
+  if (DEBUG) return;
 
   //println(Serial.list()); // see the available ports and find the correct one
   String portName = Serial.list()[PORT_NUM];

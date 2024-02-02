@@ -22,15 +22,9 @@ void loop() {
   int totemsG = totemRead(PIN_IN_TOTEM_G);
   int totemsB = totemRead(PIN_IN_TOTEM_B);
 
-  //d("totemsR: " + String(totemsR));
-  //d("totemsG: " + String(totemsG));
-  //d("totemsB: " + String(totemsB));
-
   int r = toRgbVal(totemsR);
   int g = toRgbVal(totemsG);
   int b = toRgbVal(totemsB);
-
-  //d("r: " + String(g) + " -> " + hexify(g));
 
   String hex = hexify(r) + hexify(g) + hexify(b);
   sendToProcessing(hex);
@@ -54,10 +48,6 @@ void connectProcessing() {
 }
 
 void sendToProcessing(String data) {
-  if (DEBUG) {
-    return;
-  }
-
   Serial.println(data);
 }
 
@@ -72,7 +62,6 @@ int totemRead(int pin) {
     int limit = TOTEM_VALUES[i] - (TOTEM_VALUES[i] - TOTEM_VALUES[i + 1]) / 2;
 
     if (totemVal > limit) {
-      //d("limit: " + String(limit));
       return i;
     }
   }

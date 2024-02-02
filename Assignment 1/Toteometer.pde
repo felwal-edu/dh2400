@@ -7,13 +7,22 @@ Serial arduinoPort;
 String hex = "000000";
 
 void setup() {
+  fullScreen();
   connectArduino();
 }
 
 void draw() {
   if (!hasContact) return;
 
-  background(unhex(hex));
+  int dec = unhex(hex);
+  
+  // avoid unhex(0000XX) resulting in greyscale when passed to background()
+  if (hex.substring(0, 4).equals("0000")) {
+    background(0, 0, dec);
+  }
+  else {
+    background(dec);
+  }
 }
 
 void serialEvent(Serial port) {
@@ -22,16 +31,11 @@ void serialEvent(Serial port) {
   String data = port.readStringUntil('\n').trim();
 
   // wait for connection
-  if (!hasContact) {
-    if (data.equals(".")) {
-      println(".");
-      port.clear();
-      port.write("!");
-    }
-    else {
-      hasContact = true;
-      println("contact");
-    }
+  if (data.equals(".")) {
+    port.clear();
+    port.write(".");
+    println("contact");
+    hasContact = true;
     return;
   }
 
@@ -43,7 +47,7 @@ void serialEvent(Serial port) {
 void connectArduino() {
   // https://learn.sparkfun.com/tutorials/connecting-arduino-to-processing/all
 
-  //println(Serial.list()); // find the correct port
+  //println(Serial.list()); // see the available ports and find the correct one
   String portName = Serial.list()[PORT_NUM];
   arduinoPort = new Serial(this, portName, 9600);
   arduinoPort.bufferUntil('\n');

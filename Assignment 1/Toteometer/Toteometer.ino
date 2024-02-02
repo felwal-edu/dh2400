@@ -1,12 +1,9 @@
-#include <math.h>
-
 const int PIN_IN_TOTEM_R = A0;
 const int PIN_IN_TOTEM_G = A1;
 const int PIN_IN_TOTEM_B = A2;
 
-const int MAX_HEIGHT = 3;
-const int TOTEM_COUNT = MAX_HEIGHT * 3;
-const int TOTEM_VALUES[] = { 512, 340, 256, 205 }; // TODO update
+const int TOTEM_MAX_HEIGHT = 3;
+const int TOTEM_VALUES[] = { 1023, 540, 480, 400 };
 
 const int DEBUG = false;
 
@@ -22,10 +19,10 @@ void setup() {
 
 void loop() {
   int totemsR = totemRead(PIN_IN_TOTEM_R);
-  int totemsG = 0;//totemRead(PIN_IN_TOTEM_G);
-  int totemsB = 0;//totemRead(PIN_IN_TOTEM_B);
+  int totemsG = totemRead(PIN_IN_TOTEM_G);
+  int totemsB = totemRead(PIN_IN_TOTEM_B);
 
-  d("totemsR: " + String(totemsR));
+  //d("totemsR: " + String(totemsR));
   //d("totemsG: " + String(totemsG));
   //d("totemsB: " + String(totemsB));
 
@@ -33,14 +30,13 @@ void loop() {
   int g = toRgbVal(totemsG);
   int b = toRgbVal(totemsB);
 
-  d("r: " + String(r) + " -> " + hexify(r));
+  //d("r: " + String(g) + " -> " + hexify(g));
 
   String hex = hexify(r) + hexify(g) + hexify(b);
-  // send to Processing
-  Serial.println(hex);
+  sendToProcessing(hex);
 
   d("");
-  delay(500);
+  delay(200);
 }
 
 void connectProcessing() {
@@ -57,29 +53,36 @@ void connectProcessing() {
   }
 }
 
+void sendToProcessing(String data) {
+  if (DEBUG) {
+    return;
+  }
+
+  Serial.println(data);
+}
+
 /**
  * Returns number of totems corresponding to the TOTEM_VALUES.
  */
 int totemRead(int pin) {
-
-  int totemVal = 256;//analogRead(pin);
+  int totemVal = analogRead(pin);
   d("totemVal: " + String(totemVal));
 
-  for (int i = 0; i < MAX_HEIGHT; i++) {
+  for (int i = 0; i < TOTEM_MAX_HEIGHT; i++) {
     int limit = TOTEM_VALUES[i] - (TOTEM_VALUES[i] - TOTEM_VALUES[i + 1]) / 2;
 
     if (totemVal > limit) {
-      d("limit: " + String(limit));
+      //d("limit: " + String(limit));
       return i;
     }
   }
 
-  return MAX_HEIGHT;
+  return TOTEM_MAX_HEIGHT;
 }
 
 int toRgbVal(int totems) {
-  float valPerTotem = 256.0 / MAX_HEIGHT;
-  return (int) (totems * valPerTotem - (totems == MAX_HEIGHT ? 1 : 0));
+  float valPerTotem = 256.0 / TOTEM_MAX_HEIGHT;
+  return (int) (totems * valPerTotem - (totems == TOTEM_MAX_HEIGHT ? 1 : 0));
 }
 
 String hexify(int dec) {

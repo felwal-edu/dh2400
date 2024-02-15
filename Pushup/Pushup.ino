@@ -1,5 +1,5 @@
 const int PIN_IN_PUSHSUP = A0;
-const int PUSH_UP_THRESHOLD = 22; // TODO calibrate
+const int PUSH_UP_THRESHOLD = 21; // calibrate
 const int DEBUG = false;
 
 int pushupState = false;
@@ -20,12 +20,12 @@ void loop() {
     return;
   }
 
-  if (pushedUp) {
+  if (!pushedUp) {
     pushupCounter++;
 
     sendToProcessing(String(pushupCounter));
     d("counter: " + String(pushupCounter));
-    delay(1000);
+    delay(2000);
   }
 
   pushupState = pushedUp;

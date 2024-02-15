@@ -4,7 +4,7 @@ import processing.sound.*;
 final int PORT_NUM = 0;
 final color COLOR_BG = color(64, 94, 132);
 final int ONEUP_THRESHOLD = 10;
-final boolean DEBUG = true;
+final boolean DEBUG = false;
 
 boolean hasContact = false;
 Serial arduinoPort;
@@ -17,14 +17,15 @@ SoundFile soundOneup;
 void setup() {
   textSize(86);
   fullScreen();
-  connectArduino();
 
   soundCoin = new SoundFile(this, "coin.mp3");
   soundOneup = new SoundFile(this, "1-up.mp3");
+
+  connectArduino();
 }
 
 void draw() {
-  //if (!hasContact && !DEBUG) return;
+  if (!hasContact && !DEBUG) return;
 
   background(COLOR_BG);
   
@@ -57,16 +58,16 @@ void serialEvent(Serial port) {
 }
 
 void onDataReceived() {  
-  if (pushupCount == ONEUP_THRESHOLD) {
+  if (pushupCount % ONEUP_THRESHOLD == 0) {
     soundOneup.play();
-    pushupCount = 0;
+    //pushupCount = 0;
     oneupCount++;
   }
   else {
     soundCoin.play();
   }
   
-  println(oneupCount + "oneups, " + pushupCount + " pushups");
+  println(oneupCount + " oneups, " + pushupCount + " pushups");
 }
 
 void connectArduino() {

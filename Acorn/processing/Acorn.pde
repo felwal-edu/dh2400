@@ -2,25 +2,24 @@ import processing.serial.*;
 import processing.sound.*;
 
 final int PORT_NUM = 0;
-final color COLOR_BG = color(64, 94, 132);
-final int ONEUP_THRESHOLD = 10;
+final color COLOR_BG = color(155, 155, 155);
+final int ACORN_TRHESHOLD = 3;
 final boolean DEBUG = false;
 
 boolean hasContact = false;
 Serial arduinoPort;
 
-SoundFile soundCoin;
-SoundFile soundOneup;
+SoundFile soundAcorn;
+SoundFile soundGameOver;
 
-int pushupCount = 0;
-int oneupCount = 0;
+int acornCount = 0;
 
 void setup() {
   textSize(86);
   fullScreen();
 
-  soundCoin = new SoundFile(this, "coin.mp3");
-  soundOneup = new SoundFile(this, "1-up.mp3");
+  soundAcorn = new SoundFile(this, "../../PushUp/processing/coin.mp3"); // TODO
+  soundGameOver = new SoundFile(this, "../../PushUp/processing/1-up.mp3"); // TODO
 
   connectArduino();
 }
@@ -30,10 +29,7 @@ void draw() {
 
   background(COLOR_BG);
 
-  text(pushupCount + " push-UP", 50, 100);
-  if (oneupCount > 0) {
-    text(oneupCount + " one-UP", 50, 200);
-  }
+  text(acornCount + " push-UP", 50, 100);
 }
 
 void serialEvent(Serial port) {
@@ -54,21 +50,18 @@ void serialEvent(Serial port) {
   }
 
   // recieve data
-  pushupCount = Integer.parseInt(data);
+  acornCount = Integer.parseInt(data);
   onDataReceived();
 }
 
 void onDataReceived() {
-  if (pushupCount % ONEUP_THRESHOLD == 0) {
-    soundOneup.play();
-    //pushupCount = 0;
-    oneupCount++;
-  }
-  else {
-    soundCoin.play();
+  soundAcorn.play();
+
+  if (acornCount >= ACORN_TRHESHOLD) {
+    soundGameOver.play();
   }
 
-  println(oneupCount + " oneups, " + pushupCount + " pushups");
+  println(acornCount + " acorns");
 }
 
 void connectArduino() {

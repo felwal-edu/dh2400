@@ -21,8 +21,6 @@ void setup() {
   soundAcorn = new SoundFile(this, "../../PushUp/processing/coin.mp3");
   soundGameOver = new SoundFile(this, "minecraft-rabbit-death.mp3");
 
-  //soundGameOver.play();
-
   connectArduino();
 }
 

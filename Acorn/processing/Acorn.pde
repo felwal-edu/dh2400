@@ -4,7 +4,7 @@ import processing.sound.*;
 final int PORT_NUM = 0;
 final color COLOR_BG = color(132, 132, 64);
 final int ACORN_TRHESHOLD = 3;
-final boolean DEBUG = true;
+final boolean DEBUG = false;
 
 boolean hasContact = false;
 Serial arduinoPort;
@@ -13,19 +13,21 @@ SoundFile soundAcorn;
 SoundFile soundGameOver;
 
 int acornCount = 0;
-boolean isGameOver = true;
+boolean isGameOver = false;
 
 void setup() {
   fullScreen();
 
-  soundAcorn = new SoundFile(this, "../../PushUp/processing/coin.mp3"); // TODO
+  soundAcorn = new SoundFile(this, "../../PushUp/processing/coin.mp3");
   soundGameOver = new SoundFile(this, "minecraft-rabbit-death.mp3");
+
+  //soundGameOver.play();
 
   connectArduino();
 }
 
 void draw() {
-  if (!hasContact && !DEBUG) return;
+  if (!hasContact) return;
 
   background(COLOR_BG);
   drawCounter();
@@ -74,7 +76,7 @@ void onDataReceived() {
 
   if (acornCount >= ACORN_TRHESHOLD) {
     isGameOver = true;
-    delay(1000);
+    delay(900);
     soundGameOver.play();
   }
 }

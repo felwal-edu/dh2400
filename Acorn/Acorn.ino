@@ -6,7 +6,7 @@ const int PIN_OUT_SERVO = 9;
 
 const float UV_DIST_THRESHOLD = 8;
 const int ACORN_THRESHOLD = 3;
-const int DEBUG = true;
+const int DEBUG = false;
 
 Servo servo;
 
@@ -20,68 +20,14 @@ void setup() {
   pinMode(PIN_OUT_UV, OUTPUT);
   servo.attach(PIN_OUT_SERVO);
 
-  //servo.write(180);
   closeFloor();
 
   connectProcessing();
 }
 
 void loop() {
-  //return;
-
   writeUv();
-  int distance = readUvDistance();
-  //d("distance: " + String(distance));
-  Serial.println(distance);
-
-  int isAcornFalling = distance <= UV_DIST_THRESHOLD;
-
-  if (isAcornFalling) {
-    d("|");
-  }
-  else {
-    //d("-");
-  }
-
-  //return;
-
-  // if same old state, do nothing
-  if (acornFallingState == isAcornFalling) {
-    delay(10);
-    return;
-  }
-
-  if (!isAcornFalling) {
-    acornCounter++;
-
-    if (acornCounter >= ACORN_THRESHOLD) {
-      openFloor();
-    }
-
-    sendToProcessing(String(acornCounter));
-    d("acorns: " + String(acornCounter));
-
-    delay(1000);
-  }
-
-  acornFallingState = isAcornFalling;
-}
-
-void writeUv() {
-  digitalWrite(PIN_OUT_UV, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_OUT_UV, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(PIN_OUT_UV, LOW);
-}
-
-float readUvDistance() {
-  int duration = pulseIn(PIN_IN_UV, HIGH);
-  float distance = (duration * 0.0343) / 2;
-
-  //d("distance: " + String(distance));
-
-  return distance;
+  readFallingAcorns();
 }
 
 void connectProcessing() {
@@ -104,6 +50,50 @@ void sendToProcessing(String data) {
   }
 }
 
+void readFallingAcorns() {
+  int distance = readUvDistance();
+  //d("distance: " + String(distance));
+
+  int isAcornFalling = distance <= UV_DIST_THRESHOLD;
+
+  // if same old state, do nothing
+  if (acornFallingState == isAcornFalling) {
+    delay(10);
+    return;
+  }
+
+  if (!isAcornFalling) {
+    acornCounter++;
+
+    sendToProcessing(String(acornCounter));
+    d("acorns: " + String(acornCounter));
+
+    if (acornCounter >= ACORN_THRESHOLD) {
+      delay(1000);
+      openFloor();
+    }
+
+    delay(1000);
+  }
+
+  acornFallingState = isAcornFalling;
+}
+
+void writeUv() {
+  digitalWrite(PIN_OUT_UV, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIN_OUT_UV, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PIN_OUT_UV, LOW);
+}
+
+float readUvDistance() {
+  int duration = pulseIn(PIN_IN_UV, HIGH);
+  float distance = (duration * 0.0343) / 2;
+
+  return distance;
+}
+
 void closeFloor() {
   d("floor: closed");
   servo.write(0);
@@ -113,8 +103,6 @@ void openFloor() {
   d("floor: open");
   servo.write(90);
   delay(1000);
-
-  //closeFloor();
 }
 
 void d(String s) {

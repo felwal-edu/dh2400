@@ -2,9 +2,9 @@ import processing.serial.*;
 import processing.sound.*;
 
 final int PORT_NUM = 0;
-final color COLOR_BG = color(155, 155, 155);
+final color COLOR_BG = color(132, 132, 64);
 final int ACORN_TRHESHOLD = 3;
-final boolean DEBUG = false;
+final boolean DEBUG = true;
 
 boolean hasContact = false;
 Serial arduinoPort;
@@ -13,13 +13,13 @@ SoundFile soundAcorn;
 SoundFile soundGameOver;
 
 int acornCount = 0;
+boolean isGameOver = true;
 
 void setup() {
-  textSize(86);
   fullScreen();
 
   soundAcorn = new SoundFile(this, "../../PushUp/processing/coin.mp3"); // TODO
-  soundGameOver = new SoundFile(this, "../../PushUp/processing/1-up.mp3"); // TODO
+  soundGameOver = new SoundFile(this, "minecraft-rabbit-death.mp3");
 
   connectArduino();
 }
@@ -28,8 +28,22 @@ void draw() {
   if (!hasContact && !DEBUG) return;
 
   background(COLOR_BG);
+  drawCounter();
+  drawGameOver();
+}
 
-  text(acornCount + " push-UP", 50, 100);
+void drawCounter() {
+  textSize(86);
+  textAlign(LEFT);
+  text(acornCount + " acorns", 50, 100);
+}
+
+void drawGameOver() {
+  if (isGameOver) {
+    textSize(128);
+    textAlign(CENTER);
+    text("You win!", displayWidth / 2, displayHeight / 2);
+  }
 }
 
 void serialEvent(Serial port) {
@@ -56,12 +70,13 @@ void serialEvent(Serial port) {
 
 void onDataReceived() {
   soundAcorn.play();
+  println(acornCount + " acorns");
 
   if (acornCount >= ACORN_TRHESHOLD) {
+    isGameOver = true;
+    delay(1000);
     soundGameOver.play();
   }
-
-  println(acornCount + " acorns");
 }
 
 void connectArduino() {

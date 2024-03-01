@@ -1,31 +1,57 @@
-const int PIN_IN_IR = 5;
-const int PIN_OUT_MOTOR = 6;
+#include <Servo.h>;
 
+const int PIN_IN_UV = 2; // echo
+const int PIN_OUT_UV = 3; // trig
+const int PIN_OUT_SERVO = 9;
+
+const float UV_DIST_THRESHOLD = 8;
 const int ACORN_THRESHOLD = 3;
-const int DEBUG = false;
+const int DEBUG = true;
+
+Servo servo;
 
 int acornCounter = 0;
-int pickupState = false;
+int acornFallingState = false;
 
 void setup() {
   Serial.begin(9600);
 
-  pinMode(PIN_IN_IR, INPUT);
-  pinMode(PIN_OUT_MOTOR, OUTPUT);
+  pinMode(PIN_IN_UV, INPUT);
+  pinMode(PIN_OUT_UV, OUTPUT);
+  servo.attach(PIN_OUT_SERVO);
+
+  //servo.write(180);
+  closeFloor();
 
   connectProcessing();
 }
 
 void loop() {
-  int isPickingUp = digitalRead(PIN_IN_IR);
+  //return;
+
+  writeUv();
+  int distance = readUvDistance();
+  //d("distance: " + String(distance));
+  Serial.println(distance);
+
+  int isAcornFalling = distance <= UV_DIST_THRESHOLD;
+
+  if (isAcornFalling) {
+    d("|");
+  }
+  else {
+    //d("-");
+  }
+
+  //return;
 
   // if same old state, do nothing
-  if (pickupState == isPickingUp) {
-    delay(200);
+  if (acornFallingState == isAcornFalling) {
+    delay(10);
     return;
   }
 
-  if (!isPickingUp) {
+  if (!isAcornFalling) {
     acornCounter++;
 
     if (acornCounter >= ACORN_THRESHOLD) {
@@ -33,11 +59,29 @@ void loop() {
     }
 
     sendToProcessing(String(acornCounter));
-    d("counter: " + String(acornCounter));
-    delay(2000);
+    d("acorns: " + String(acornCounter));
+
+    delay(1000);
   }
 
-  pickupState = isPickingUp;
+  acornFallingState = isAcornFalling;
+}
+
+void writeUv() {
+  digitalWrite(PIN_OUT_UV, LOW);
+  delayMicroseconds(2);
+  digitalWrite(PIN_OUT_UV, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(PIN_OUT_UV, LOW);
+}
+
+float readUvDistance() {
+  int duration = pulseIn(PIN_IN_UV, HIGH);
+  float distance = (duration * 0.0343) / 2;
+
+  //d("distance: " + String(distance));
+
+  return distance;
 }
 
 void connectProcessing() {
@@ -60,9 +104,17 @@ void sendToProcessing(String data) {
   }
 }
 
+void closeFloor() {
+  d("floor: closed");
+  servo.write(0);
+}
+
 void openFloor() {
-  // TODO motor
-  digitalWrite(PIN_OUT_MOTOR, HIGH);
+  d("floor: open");
+  servo.write(90);
+  delay(1000);
+
+  //closeFloor();
 }
 
 void d(String s) {
